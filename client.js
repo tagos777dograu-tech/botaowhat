@@ -32,7 +32,7 @@ TrelloPowerUp.initialize({
             return t.popup({
               title: 'Abrir WhatsApp',
               url: './abrir.html',
-              height: 120,
+              height: 160,
             });
           },
         },

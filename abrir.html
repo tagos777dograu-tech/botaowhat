@@ -12,6 +12,25 @@
       var t = window.TrelloPowerUp.iframe();
       var box = document.getElementById('conteudo');
 
+      function criarBotao(texto, href, alvo, primario, fechar) {
+        var a = document.createElement('a');
+        a.href = href;
+        a.target = alvo;
+        a.textContent = texto;
+        a.style.cssText =
+          'display:block;text-align:center;padding:8px 12px;border-radius:3px;margin-top:8px;' +
+          'text-decoration:none;font-weight:600;' +
+          (primario
+            ? 'background:#0c66e4;color:#fff;'
+            : 'background:rgba(128,128,128,0.25);color:inherit;');
+        a.addEventListener('click', function () {
+          setTimeout(function () {
+            t.closePopup();
+          }, 400);
+        });
+        return a;
+      }
+
       t.render(function () {
         return Promise.all([
           t.get('card', 'shared', 'telefone'),
@@ -28,30 +47,20 @@
               return;
             }
 
-            var link = 'https://wa.me/' + telefone;
-            if (mensagem) {
-              link += '?text=' + encodeURIComponent(mensagem);
-            }
+            var texto = mensagem ? encodeURIComponent(mensagem) : '';
+
+            // Abre direto no app do WhatsApp instalado no computador (sem recarregar nada)
+            var linkApp = 'whatsapp://send?phone=' + telefone + (texto ? '&text=' + texto : '');
+
+            // Abre no WhatsApp Web, sempre reaproveitando a mesma aba
+            var linkWeb = 'https://wa.me/' + telefone + (texto ? '?text=' + texto : '');
 
             var info = document.createElement('p');
             info.textContent = 'Contato: +' + telefone;
 
-            var botao = document.createElement('a');
-            botao.href = link;
-            botao.target = '_blank';
-            botao.rel = 'noopener noreferrer';
-            botao.textContent = 'Abrir conversa';
-            botao.style.cssText =
-              'display:block;text-align:center;padding:8px 12px;border-radius:3px;' +
-              'background:#0c66e4;color:#fff;text-decoration:none;font-weight:600;';
-            botao.addEventListener('click', function () {
-              setTimeout(function () {
-                t.closePopup();
-              }, 300);
-            });
-
             box.appendChild(info);
-            box.appendChild(botao);
+            box.appendChild(criarBotao('Abrir no app do WhatsApp', linkApp, '_blank', true));
+            box.appendChild(criarBotao('Abrir no WhatsApp Web', linkWeb, 'whatsapp_chat', false));
           })
           .then(function () {
             t.sizeTo('#conteudo').done();
