@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css" />
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+  </head>
+  <body>
+    <div id="conteudo"><p>Carregando...</p></div>
+
+    <script>
+      var t = window.TrelloPowerUp.iframe();
+      var box = document.getElementById('conteudo');
+
+      t.render(function () {
+        return Promise.all([
+          t.get('card', 'shared', 'telefone'),
+          t.get('card', 'shared', 'mensagem'),
+        ])
+          .then(function (dados) {
+            var telefone = dados[0];
+            var mensagem = dados[1];
+
+            box.innerHTML = '';
+
+            if (!telefone) {
+              box.textContent = 'Nenhum contato definido neste cartão.';
+              return;
+            }
+
+            var link = 'https://wa.me/' + telefone;
+            if (mensagem) {
+              link += '?text=' + encodeURIComponent(mensagem);
+            }
+
+            var info = document.createElement('p');
+            info.textContent = 'Contato: +' + telefone;
+
+            var botao = document.createElement('a');
+            botao.href = link;
+            botao.target = '_blank';
+            botao.rel = 'noopener noreferrer';
+            botao.textContent = 'Abrir conversa';
+            botao.style.cssText =
+              'display:block;text-align:center;padding:8px 12px;border-radius:3px;' +
+              'background:#0c66e4;color:#fff;text-decoration:none;font-weight:600;';
+            botao.addEventListener('click', function () {
+              setTimeout(function () {
+                t.closePopup();
+              }, 300);
+            });
+
+            box.appendChild(info);
+            box.appendChild(botao);
+          })
+          .then(function () {
+            t.sizeTo('#conteudo').done();
+          });
+      });
+    </script>
+  </body>
+</html>

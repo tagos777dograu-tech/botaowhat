@@ -2,25 +2,10 @@
 
 var ICON = new URL('./icon.svg', window.location.href).href;
 
-// Monta o link do WhatsApp: https://wa.me/5527999998888?text=Ola
-function montarLink(telefone, mensagem) {
-  var link = 'https://wa.me/' + telefone;
-  if (mensagem) {
-    link += '?text=' + encodeURIComponent(mensagem);
-  }
-  return link;
-}
-
 TrelloPowerUp.initialize({
   'card-buttons': function (t) {
     // Lê o contato salvo neste cartão
-    return Promise.all([
-      t.get('card', 'shared', 'telefone'),
-      t.get('card', 'shared', 'mensagem'),
-    ]).then(function (dados) {
-      var telefone = dados[0];
-      var mensagem = dados[1];
-
+    return t.get('card', 'shared', 'telefone').then(function (telefone) {
       var botaoEditar = {
         icon: ICON,
         text: telefone ? 'Editar contato' : 'Definir contato',
@@ -43,8 +28,13 @@ TrelloPowerUp.initialize({
         {
           icon: ICON,
           text: 'Abrir WhatsApp',
-          url: montarLink(telefone, mensagem),
-          target: 'Abrir WhatsApp',
+          callback: function (t) {
+            return t.popup({
+              title: 'Abrir WhatsApp',
+              url: './abrir.html',
+              height: 120,
+            });
+          },
         },
         botaoEditar,
       ];
