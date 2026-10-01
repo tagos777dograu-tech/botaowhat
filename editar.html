@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css" />
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+  </head>
+  <body>
+    <form id="form">
+      <label for="telefone">Telefone (com DDD)</label>
+      <input id="telefone" type="tel" placeholder="27 99999-8888" autocomplete="off" />
+
+      <label for="mensagem">Mensagem inicial (opcional)</label>
+      <input id="mensagem" type="text" placeholder="Olá! Tudo bem?" autocomplete="off" />
+
+      <p id="erro" style="color: #c9372c; display: none; margin: 8px 0 0;">
+        Telefone inválido. Use DDD + número.
+      </p>
+
+      <button type="submit" class="mod-primary" style="margin-top: 12px;">Salvar</button>
+    </form>
+
+    <script>
+      var t = window.TrelloPowerUp.iframe();
+      var campoTelefone = document.getElementById('telefone');
+      var campoMensagem = document.getElementById('mensagem');
+      var erro = document.getElementById('erro');
+
+      // Preenche com o contato já salvo no cartão
+      t.render(function () {
+        return Promise.all([
+          t.get('card', 'shared', 'telefone'),
+          t.get('card', 'shared', 'mensagem'),
+        ])
+          .then(function (dados) {
+            campoTelefone.value = dados[0] || '';
+            campoMensagem.value = dados[1] || '';
+          })
+          .then(function () {
+            t.sizeTo('#form').done();
+          });
+      });
+
+      // Deixa só números e adiciona 55 (Brasil) se vier só DDD + número
+      function normalizar(valor) {
+        var numeros = valor.replace(/\D/g, '');
+        if (numeros.length === 10 || numeros.length === 11) {
+          numeros = '55' + numeros;
+        }
+        return numeros;
+      }
+
+      document.getElementById('form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var telefone = normalizar(campoTelefone.value);
+
+        if (telefone.length < 12 || telefone.length > 15) {
+          erro.style.display = 'block';
+          return;
+        }
+
+        return Promise.all([
+          t.set('card', 'shared', 'telefone', telefone),
+          t.set('card', 'shared', 'mensagem', campoMensagem.value.trim()),
+        ]).then(function () {
+          t.closePopup();
+        });
+      });
+    </script>
+  </body>
+</html>
